@@ -23,7 +23,7 @@ If you aren't familiar with [reddit](https://www.reddit.com/), go check it out a
 
 - What you choose could partly determine how difficult your data cleaning will be and how challenging the classification task will be for your algorithms. In your presentation and executive summary, **tell us what you used**.
 - You should aim to have a function built to pull down data from the API by Monday, September 18.
-- The more data you can pull the better for your classifier. **You will want data from at least 3000 unique, non-null comments.**
+- The more data you can pull the better for your classifier. **You will want data from at least 5000 unique, non-null comments.**
 
 ---
 
