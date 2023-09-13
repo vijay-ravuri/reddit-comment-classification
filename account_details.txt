@@ -2,3 +2,6 @@ Ok_Conflict7553
 thisisalongpassword123
 id?: F371gJQiT9dtGYcmMUIKuA
 secret: 3gn5Dn9QtUmWW5ee_TVmbXzlPo_wHg
+
+openai organization id: org-v2LFcd4G4l3FXNhFlFVapOrx
+openai secret key: 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
