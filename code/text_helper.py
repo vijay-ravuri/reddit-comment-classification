@@ -1,7 +1,7 @@
 import string
 import re
 import numpy as np
-import emoji
+import emoji # Found this library while looking for a way to check if emojis are in a string
 from nltk.corpus import stopwords
 punctuation = string.punctuation
 
