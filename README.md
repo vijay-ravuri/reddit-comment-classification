@@ -1,179 +1,53 @@
-# ![](https://ga-dash.s3.amazonaws.com/production/assets/logo-9f88ae6c9c3871690e33280fcf557f33.png) Project 3: Web APIs & NLP
+# Project 3 - Web APIs & NLP
+insert presentation link here (this time to the pdf)
+## Description
+In the past year, the capability of modern AI models and the prevalence of AI-generated have come to the forefront of public discourse for more than just the more technical-minded. The endemic of AI-generated submissions in schools across all levels has created a need for a way to discern whether something was AI-generated or not. In this same vein, we took a look at 5413 posts on Reddit across 6 different subreddits and gathered the top-rated comment in each thread. The thread titles were then fed into the DaVinci Large Language Model (LLM) created by OpenAI in order to gather 5413 AI-generated responses to those thread titles. The primary goal was to build a model that could accurately discern whether a given response was real or AI-generated. 
 
-### Description
+The 6 subreddits used were:
+- AskReddit
+- AskScience
+- AskHistorians
+- NoStupidQuestions
+- explainlikeimfive
+- DoesAnybodyElse
 
-In week four we've learned about a few different classifiers. In week five we'll learn about webscraping, APIs, and Natural Language Processing (NLP). This project will put those skills to the test.
+These subreddits were chosen to represent a wide range of different types of question-answer format subreddits in order to create a model that was robust to different types of questions and answers. A secondary goal was to determine whether the subreddit had any effect on the ease of detecting whether a post was AI-generated or not. Our hypothesis was that subreddits such as AskScience and AskHistorians that have much more thorough and in-depth answers would cause an uneven performance for our model because subreddits such as DoesAnybodyElse and AskReddit have a higher tendency towards more flippant and shorter answers. 
 
-For project 3, your goal is two-fold:
-1. Using [PRAW](https://praw.readthedocs.io/en/stable/), you'll collect pairs of __Question and the answer with most votes__ from various subreddits.
-2. Next, you will use [OpenAI](https://openai.com/blog/openai-api) API to ask the same question to ChatGPT. You will repeat this process for all the questions from Step 1. You need to ignore any responses where ChatGPT refuses to provide a "straightforward" answer. This kind of responses usually have a pattern and they usually start with something like "As a large language model I do not have the ability to blah blah...". If you receive such a response, move on to the next question. Gather at least 5000 such question-answer pairs and corresponding ChatGPT response.
-3. Create a dataset with the data collected in previous two steps. Ideally, the dataset should have at least the following columns:
+## Data Gathering & Processing
+We used the **Python Reddit API Wrapper (PRAW)** and attempted gather the top 1000 posts in the past year from each subreddit. Due to API access issues we were only able to get between 900 and 1000 posts from each subreddit. From that number, every thread where the comment was removed or deleted was excluded along with any posts that did not fit the question-answer format. Some of our subreddits do allow for posts to have body text that adds more context to the the question but due to OpenAI API limitations we did not include body text as a factor for generating our AI responses. 
 
-| row_id | Question | Human_written_answer | ChatGPT_generated_answer |
-| ------- | ------- | --------------------- | ------------------------ |
-| 1 | abcd | efgh | ijkl |
+**OpenAI** hosts a number of cutting edge AI models and are the organization behind the groundbreaking ChatGPT LLM that sparked the recent AI craze. We used their API to access the DaVinci LLM which works in similar ways to ChatGPT but is far less robust. The primary reason for using DaVinci over ChatGPT 3.5 was due to limitations on frequency of access for ChatGPT making the process untenable in our time frame given our large sample size. We were able to generate a response to every post gathered for a total of 5413 AI-generated 'reddit comments.' Due to monetary limitations, responses were limited in length which may have some effect on our ability to discern AI-generated comments.
 
-4. You'll then use NLP to train a classifier on whether a response came from a human being or ChatGPT. This is a binary classification problem.
+Some effort was taken to clean the responses from both sources in order to maximize the differences the model was detecting in content and minimize structural differences between the real and AI-generated comments. In particular, Reddit requires two newline characters in order to format a new paragraph so we replaced all instances of multiple consecutive newline characters with a single newline character instead. Additionally, all instances of a comment referencing a user by their direct name (/u/\<name\>) was replaced with the pronoun 'they' to minimize syntaxical abberations caused by removing those references. Our results suggest that these changes had only a nominal effect on our modelling and are likely unnecessary in the case of further research in this vein.
 
+## Metrics
+We primarily measured model performance using accuracy:
 
----
-## Checkpoints and Advice
+ $$\begin{align*}accuracy = \frac{\#\; of\, correct\, predictions}{\#\; of\, total\, predictions}\end{align*}$$
 
-If you aren't familiar with [reddit](https://www.reddit.com/), go check it out and browse different subreddits. Each subreddit is like a forum on a different topic. [Here's a list of subreddits by topic.](https://www.reddit.com/r/ListOfSubreddits/wiki/listofsubreddits)
+ The other metrics used to compare our tuned final models were:
+ $$\begin{align*}
+ recall = \frac{\#\; of\, correct\, positive\, predictions}{\#\; observed\, positives}
+ \\precision = \frac{\#\; of\, correct\, positive\, predictions}{\#\; of\, total\, predicted\, positives}
+ \\ F_1\;Score = 2\cdot\frac{precision \cdot recall}{precision + recall}
+ \end{align*}$$
 
-- What you choose could partly determine how difficult your data cleaning will be and how challenging the classification task will be for your algorithms. In your presentation and executive summary, **tell us what you used**.
-- You should aim to have a function built to pull down data from the API by Monday, September 18.
-- The more data you can pull the better for your classifier. **You will want data from at least 5000 unique, non-null comments.**
+Recall (sensitivity) is a measure of how well our model classifies AI-generated posts as AI-generated. Precision (postitive predictive value) measures what proportion of our AI-generated predictions are correct. F<sub>1</sub> Score is the harmonic mean of precision and recall and is used to measure how well balanced our model is between the two metrics. All three of these measures help us understand where our model goes wrong and are used to supplement our accuracy to provide context to that number.
 
----
+## Models
+We fit a number of models ranging from Naive Bayes to Ensemble methods and selected three high-performing models to explore further by tuning parameters in order to maximize predictive power. The three models selected were 
+- **Extra Trees**: An ensemble classification method built on the basis of the Random Forest method.
+- **Support Vector Machine**: A classification tool that fits a hyperplane that best splits the data into each class.
+- **Adaptive Boosting**: An ensemble based model that trains a number of simple models in succession each weighted to adjust for the previous model's incorrect predictions.
 
-### Requirements
+We identified **Extra Trees**  as our best overall model by most metrics. An in-depth explanation of the Random Forest algorithm and Extra Trees as an extension of it can be found [here](https://quantdare.com/random-forest-many-are-better-than-one/) and [here](https://quantdare.com/what-is-the-difference-between-extra-trees-and-random-forest/). In brief, the Random Forest classification method works by fitting a number of simple decision trees on [bootstrapped](https://www.mastersindatascience.org/learning/machine-learning-algorithms/bootstrapping/) samples of data. The final prediction is the aggregate of each individual devision tree's prediction. Typically, the Random Forest method allows for highly accurate predictions while reducing variance when compared to a traditional decision tree. The Extra Trees model alters Random forest in two key ways: firstly there is no bootstrapping involved and secondly within each tree the additional randomness is introduced to the splitting process. By removing bootstrapping Extra Trees is a much faster model to train while reducing bias and adding randomness to the splitting process further reduces variance.
 
-- Gather and prepare your data using the appropriate APIs.
-- **Create and compare at least two models**. These can be any classifier of your choosing: logistic regression, Naive Bayes, KNN, SVM, Random Forest Classifier, etc.
-  - **Bonus**: use a Naive Bayes classifier
-- You **must** build a robust commit history on GHE for this project, with the first commit no later than next Monday, 9/18/23.
-- A Jupyter Notebook with your analysis for a peer audience of data scientists.
-- An executive summary of your results.
-- A short presentation outlining your process and findings for a semi-technical audience.
-
-**Pro Tip:** You can find a good example executive summary [here](https://www.proposify.biz/blog/executive-summary).
-
----
-
-### Necessary Deliverables / Submission
-
-- Code and executive summary must be in a clearly commented Jupyter Notebook.
-- You must submit your slide deck.
-- Materials must be submitted by **9:00 AM EST on Monday, September 18, 2023**.
-- Presentation must be ready by **09:00 AM EST on Monday, September 18, 2023**.
-
----
-
-## Rubric
-You should make sure that you consider and/or follow most if not all of the considerations/recommendations outlined below **while** working through your project.
-
-For Project 3 the evaluation categories are as follows:<br>
-**The Data Science Process**
-- Problem Statement
-- Data Collection
-- Data Cleaning & EDA
-- Preprocessing & Modeling
-- Evaluation and Conceptual Understanding
-- Conclusion and Recommendations
-
-**Organization and Professionalism**
-- Organization
-- Visualizations
-- Python Syntax and Control Flow
-- Presentation
-
-**Scores will be out of 30 points based on the 10 categories in the rubric.** <br>
-*3 points per section*<br>
-
-| Score | Interpretation |
-| --- | --- |
-| **0** | *Project fails to meet the minimum requirements for this item.* |
-| **1** | *Project meets the minimum requirements for this item, but falls significantly short of portfolio-ready expectations.* |
-| **2** | *Project exceeds the minimum requirements for this item, but falls short of portfolio-ready expectations.* |
-| **3** | *Project meets or exceeds portfolio-ready expectations; demonstrates a thorough understanding of every outlined consideration.* |
+Here are sources for additional explanations for [Adaptive Boosting](https://www.analyticsvidhya.com/blog/2021/09/adaboost-algorithm-a-complete-guide-for-beginners/) and [Support Vector Machines](https://www.analyticsvidhya.com/blog/2021/10/support-vector-machinessvm-a-complete-guide-for-beginners/). Both models have their merits as explored in [the model evaluation notebook](./code/04-Model_Evaluation.ipynb).
 
 
-### The Data Science Process
+## Conclusion & Future Work
+Our final model was able to detect whether a comment was real or AI-generated with an accuracy of 93.02%. We also saw that our model had a tendency towards over-sensitivity and was more likely to incorrectly classify a real post as fake than it was to incorrectly classify a fake post as real. We can surmise that in our specific case, it is incredibly easy for a model to detect whether a comment is real or AI-generated. DaVinci is a fairly sophisticated model but it does not perform at the same level as the ChatGPT line of AI-models and clearly it cannot accurately mimic a response by an actual Reddit commentor.
 
-**Problem Statement**
-- Is it clear what the goal of the project is?
-- What type of model will be developed?
-- How will success be evaluated?
-- Is the scope of the project appropriate?
-- Is it clear who cares about this or why this is important to investigate?
-- Does the student consider the audience and the primary and secondary stakeholders?
+We also found that our model performed very differently from subreddit to subreddit. In particular our model was quite adept at classifying posts on AskHistorians with a subreddit accuracy of 96.71%. Interestingly, our model did much worse at classifying posts on AskScience with an accuracy of only 91.77%. Further breakdowns of subreddit to subreddit performance can be found in [this notebook](./code/04-Model_Evaluation.ipynb).
 
-**Data Collection**
-- Was enough data gathered to generate a significant result?
-- Was data collected that was useful and relevant to the project?
-- Was data collection and storage optimized through custom functions, pipelines, and/or automation?
-- Was thought given to the server receiving the requests such as considering number of requests per second?
-
-**Data Cleaning and EDA**
-- Are missing values imputed/handled appropriately?
-- Are distributions examined and described?
-- Are outliers identified and addressed?
-- Are appropriate summary statistics provided?
-- Are steps taken during data cleaning and EDA framed appropriately?
-- Does the student address whether or not they are likely to be able to answer their problem statement with the provided data given what they've discovered during EDA?
-
-**Preprocessing and Modeling**
-- Is text data successfully converted to a matrix representation?
-- Are methods such as stop words, stemming, and lemmatization explored?
-- Does the student properly split and/or sample the data for validation/training purposes?
-- Does the student test and evaluate a variety of models to identify a production algorithm (**AT MINIMUM:** two classification models, **BONUS:** try a Naive Bayes)?
-- Does the student defend their choice of production model relevant to the data at hand and the problem?
-- Does the student explain how the model works and evaluate its performance successes/downfalls?
-
-**Evaluation and Conceptual Understanding**
-- Does the student accurately identify and explain the baseline score?
-- Does the student select and use metrics relevant to the problem objective?
-- Does the student interpret the results of their model for purposes of inference?
-- Is domain knowledge demonstrated when interpreting results?
-- Does the student provide appropriate interpretation with regards to descriptive and inferential statistics?
-
-**Conclusion and Recommendations**
-- Does the student provide appropriate context to connect individual steps back to the overall project?
-- Is it clear how the final recommendations were reached?
-- Are the conclusions/recommendations clearly stated?
-- Does the conclusion answer the original problem statement?
-- Does the student address how findings of this research can be applied for the benefit of stakeholders?
-- Are future steps to move the project forward identified?
-
-
-### Organization and Professionalism
-
-**Project Organization**
-- Are modules imported correctly (using appropriate aliases)?
-- Are data imported/saved using relative paths?
-- Does the README provide a good executive summary of the project?
-- Is markdown formatting used appropriately to structure notebooks?
-- Are there an appropriate amount of comments to support the code?
-- Are files & directories organized correctly?
-- Are there unnecessary files included?
-- Do files and directories have well-structured, appropriate, consistent names?
-- Is there a robust commit history?
-
-**Visualizations**
-- Are sufficient visualizations provided?
-- Do plots accurately demonstrate valid relationships?
-- Are plots labeled properly?
-- Are plots interpreted appropriately?
-- Are plots formatted and scaled appropriately for inclusion in a notebook-based technical report?
-
-**Python Syntax and Control Flow**
-- Is care taken to write human readable code?
-- Is the code syntactically correct (no runtime errors)?
-- Does the code generate desired results (logically correct)?
-- Does the code follows general best practices and style guidelines?
-- Are Pandas functions used appropriately?
-- Are `sklearn` and `NLTK` methods used appropriately?
-
-**Presentation**
-- Is the problem statement clearly presented?
-- Does a strong narrative run through the presentation building toward a final conclusion?
-- Are the conclusions/recommendations clearly stated?
-- Is the level of technicality appropriate for the intended audience?
-- Is the student substantially over or under time?
-- Does the student appropriately pace their presentation?
-- Does the student deliver their message with clarity and volume?
-- Are appropriate visualizations generated for the intended audience?
-- Are visualizations necessary and useful for supporting conclusions/explaining findings?
-
-
----
-
-### Why did we choose this project for you?
-This project covers three of the biggest concepts we cover in the class: Classification Modeling, Natural Language Processing and Data Wrangling/Acquisition.
-
-Part 1 of the project focuses on **Data wrangling/gathering/acquisition**. This is a very important skill as not all the data you will need will be in clean CSVs or a single table in SQL.  There is a good chance that wherever you land you will have to gather some data from some unstructured/semi-structured sources; when possible, requesting information from an API, but sometimes scraping it because they don't have an API (or it's terribly documented).
-
-Part 2 of the project focuses on **Natural Language Processing** and converting standard text data (like Titles and Comments) into a format that allows us to analyze it and use it in modeling.
-
-Part 3 of the project focuses on **Classification Modeling**.  Given that project 2 was a regression focused problem, we needed to give you a classification focused problem to practice the various models, means of assessment and preprocessing associated with classification.   
+For further research the easiest next step would be to run the same analysis using responses gathered using ChatGPT 3.5 or 4 depending on funding and time constraints. Both models are much more sophisticated than the DaVinci model which will affect how easily a model can identify if a post is written by an AI. Another simple next step would be to remove the token limit on the DaVinci model to see if allowing the AI to respond with no limitations has any effect on our ability to identify AI-generated comments.
