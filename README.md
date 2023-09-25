@@ -23,14 +23,15 @@ Some effort was taken to clean the responses from both sources in order to maxim
 ## Metrics
 We primarily measured model performance using accuracy:
 
- $$\begin{align*}accuracy = \frac{\#\; of\, correct\, predictions}{\#\; of\, total\, predictions}\end{align*}$$
+<p align="center">
+    <img src="./images/accuracy.png" />
+</p>
 
  The other metrics used to compare our tuned final models were:
- $$\begin{align*}
- recall = \frac{\#\; of\, correct\, positive\, predictions}{\#\; observed\, positives}
- \\precision = \frac{\#\; of\, correct\, positive\, predictions}{\#\; of\, total\, predicted\, positives}
- \\ F_1\;Score = 2\cdot\frac{precision \cdot recall}{precision + recall}
- \end{align*}$$
+
+<p align="center">
+    <img src="./images/other_metrics.png" />
+</p>
 
 Recall (sensitivity) is a measure of how well our model classifies AI-generated posts as AI-generated. Precision (postitive predictive value) measures what proportion of our AI-generated predictions are correct. F<sub>1</sub> Score is the harmonic mean of precision and recall and is used to measure how well balanced our model is between the two metrics. All three of these measures help us understand where our model goes wrong and are used to supplement our accuracy to provide context to that number.
 
