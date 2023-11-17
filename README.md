@@ -1,4 +1,4 @@
-# Project 3 - Web APIs & NLP
+# Real vs. Fake Reddit Comments
 [presentation link](./presentation.pdf)
 ## Description
 In the past year, the capability of modern AI models and the prevalence of AI-generated have come to the forefront of public discourse for more than just the more technical-minded. The endemic of AI-generated submissions in schools across all levels has created a need for a way to discern whether something was AI-generated or not. In this same vein, we took a look at 5413 posts on Reddit across 6 different subreddits and gathered the top-rated comment in each thread. The thread titles were then fed into the DaVinci Large Language Model (LLM) created by OpenAI in order to gather 5413 AI-generated responses to those thread titles. The primary goal was to build a model that could accurately discern whether a given response was real or AI-generated. 
